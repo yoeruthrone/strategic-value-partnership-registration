@@ -8,7 +8,7 @@ export default function DuplicateModal({ open, result, onCancel, onContinue }) {
         <p className="muted">Sistem menemukan data yang kemungkinan sudah pernah didaftarkan.</p>
         {result?.name_partner_matches?.length > 0 && (
           <div className="duplicate-box">
-            <strong>Nama + Asal Mitra sama</strong>
+            <strong>Nama + Nama Mitra sama</strong>
             {result.name_partner_matches.map((name) => <div key={name}>{name}</div>)}
           </div>
         )}

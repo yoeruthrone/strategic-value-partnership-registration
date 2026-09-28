@@ -53,10 +53,8 @@ export default function ParticipantsPage() {
     { key: 'created_at', label: 'Waktu', render: (r) => formatWitaTime(r.created_at) },
     { key: 'full_name', label: 'Nama' },
     { key: 'phone', label: 'No. Telp', render: (r) => r.phone || '-' },
-    { key: 'partner_name', label: 'Asal Mitra' },
+    { key: 'partner_name', label: 'Nama Mitra' },
     { key: 'position', label: 'Jabatan' },
-    { key: 'participant_type', label: 'Jenis', render: (r) => <span className={`type-badge ${r.participant_type.toLowerCase()}`}>{r.participant_type === 'PRIMARY' ? 'UTAMA' : 'ANGGOTA'}</span> },
-    { key: 'primary_name', label: 'Pendaftar Utama', render: (r) => r.primary_name || '-' },
   ]
   function onSort(key) { setSort((s) => ({ key, dir: s.key === key && s.dir === 'asc' ? 'desc' : 'asc' })); setPage(1) }
 

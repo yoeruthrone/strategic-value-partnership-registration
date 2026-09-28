@@ -158,16 +158,14 @@ function writeDashboard_(sheet, eventName, snapshot, partners) {
 function writeParticipants_(sheet, participants) {
   if (sheet.getFilter()) sheet.getFilter().remove();
   sheet.clear();
-  const header = ['No', 'Waktu WITA', 'Nama Lengkap', 'No. Telp', 'Asal Mitra', 'Jabatan', 'Jenis', 'Pendaftar Utama'];
+  const header = ['No', 'Waktu WITA', 'Nama Lengkap', 'No. Telp', 'Nama Mitra', 'Jabatan'];
   const rows = participants.map((p, index) => [
     index + 1,
     formatWita_(p.created_at),
     p.full_name || '',
     p.phone || '-',
     p.partner_name || '',
-    p.position || '',
-    p.participant_type === 'PRIMARY' ? 'UTAMA' : 'ANGGOTA',
-    p.primary_name || '-'
+    p.position || ''
   ]);
 
   sheet.getRange(1, 1, 1, header.length).setValues([header]);
@@ -178,7 +176,7 @@ function writeParticipants_(sheet, participants) {
 function writePartners_(sheet, partners) {
   if (sheet.getFilter()) sheet.getFilter().remove();
   sheet.clear();
-  const header = ['No', 'Asal Mitra', 'Jumlah Peserta'];
+  const header = ['No', 'Nama Mitra', 'Jumlah Peserta'];
   const rows = partners.map((p, index) => [index + 1, p.partner_name, p.participant_count]);
 
   sheet.getRange(1, 1, 1, header.length).setValues([header]);

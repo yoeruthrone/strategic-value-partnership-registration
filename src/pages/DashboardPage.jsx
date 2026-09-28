@@ -56,7 +56,7 @@ export default function DashboardPage() {
     { key: 'created_at', label: 'Waktu', render: (r) => <span className="time-pill">{formatWitaTime(r.created_at)}</span> },
     { key: 'full_name', label: 'Nama Lengkap' },
     { key: 'phone', label: 'No. Telp', render: (r) => r.phone || '-' },
-    { key: 'partner_name', label: 'Asal Mitra' },
+    { key: 'partner_name', label: 'Nama Mitra' },
     { key: 'position', label: 'Jabatan' },
   ]
 

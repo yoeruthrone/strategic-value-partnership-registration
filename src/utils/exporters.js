@@ -9,10 +9,8 @@ export function exportParticipantsExcel(rows, filename = 'peserta-event.xlsx') {
     Waktu: formatWitaTime(r.created_at),
     Nama: r.full_name,
     'No. Telepon': r.phone || '-',
-    'Asal Mitra': r.partner_name,
+    'Nama Mitra': r.partner_name,
     Jabatan: r.position,
-    Jenis: r.participant_type === 'PRIMARY' ? 'UTAMA' : 'ANGGOTA',
-    'Pendaftar Utama': r.primary_name || '-',
   }))
   const ws = XLSX.utils.json_to_sheet(data)
   const wb = XLSX.utils.book_new()
@@ -26,7 +24,7 @@ export function exportParticipantsPdf(rows, eventName = 'Event', filename = 'pes
   doc.text(`Laporan Peserta - ${eventName}`, 14, 16)
   autoTable(doc, {
     startY: 22,
-    head: [['No', 'Waktu', 'Nama', 'No. Telepon', 'Asal Mitra', 'Jabatan', 'Jenis', 'Pendaftar Utama']],
+    head: [['No', 'Waktu', 'Nama', 'No. Telepon', 'Nama Mitra', 'Jabatan']],
     body: rows.map((r, i) => [
       i + 1,
       formatWitaTime(r.created_at),
@@ -34,8 +32,6 @@ export function exportParticipantsPdf(rows, eventName = 'Event', filename = 'pes
       r.phone || '-',
       r.partner_name,
       r.position,
-      r.participant_type === 'PRIMARY' ? 'UTAMA' : 'ANGGOTA',
-      r.primary_name || '-',
     ]),
     styles: { fontSize: 8 },
   })
