@@ -1,0 +1,1 @@
+export default function Brand({compact=false}){return <div className={`brand ${compact?'compact':''}`}><img src="/sena-logo.png" alt="SENA"/><div><strong>SENA</strong><span>Registration Platform</span></div></div>}

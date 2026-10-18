@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Building2, RefreshCw, Search, Users } from 'lucide-react'
+import { Building2, CheckCircle2, Clock3, RefreshCw, Search, Users } from 'lucide-react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatWitaTime } from '../utils/normalize'
@@ -11,7 +11,7 @@ import Loading from '../components/Loading'
 export default function DashboardPage() {
   const { secret } = useOutletContext()
   const navigate = useNavigate()
-  const [snapshot, setSnapshot] = useState({ participants: [], total_participants: 0, total_partners: 0 })
+  const [snapshot, setSnapshot] = useState({ participants: [], total_participants: 0, total_partners: 0, total_attended: 0, total_not_attended: 0 })
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState({ key: 'created_at', dir: 'desc' })
   const [pageSize, setPageSize] = useState(20)
@@ -23,7 +23,7 @@ export default function DashboardPage() {
     if (!silent) setLoading(true)
     const { data, error: rpcError } = await supabase.rpc('dashboard_snapshot', { p_secret: secret })
     if (rpcError) setError(rpcError.message)
-    else { setSnapshot(data || { participants: [], total_participants: 0, total_partners: 0 }); setError('') }
+    else { setSnapshot(data || { participants: [], total_participants: 0, total_partners: 0, total_attended: 0, total_not_attended: 0 }); setError('') }
     setLoading(false)
   }, [secret])
 
@@ -58,6 +58,7 @@ export default function DashboardPage() {
     { key: 'phone', label: 'No. Telp', render: (r) => r.phone || '-' },
     { key: 'partner_name', label: 'Nama Mitra' },
     { key: 'position', label: 'Jabatan' },
+    { key: 'attendance_status', label: 'Kehadiran', render: (r) => <span className={`attendance-pill table-status ${r.attendance_status === 'ATTENDED' ? 'attended' : ''}`}>{r.attendance_status === 'ATTENDED' ? 'HADIR' : 'BELUM HADIR'}</span> },
   ]
 
   return (
@@ -67,6 +68,8 @@ export default function DashboardPage() {
       <div className="stats-grid">
         <StatCard label="Total Peserta" value={snapshot.total_participants} icon={<Users />} onClick={() => navigate(`/internal/${secret}/participants`)} />
         <StatCard label="Total Mitra" value={snapshot.total_partners} icon={<Building2 />} onClick={() => navigate(`/internal/${secret}/partners`)} />
+        <StatCard label="Sudah Hadir" value={snapshot.total_attended || 0} icon={<CheckCircle2 />} onClick={() => navigate(`/internal/${secret}/scanner`)} />
+        <StatCard label="Belum Hadir" value={snapshot.total_not_attended || 0} icon={<Clock3 />} onClick={() => navigate(`/internal/${secret}/participants`)} />
       </div>
       <div className="toolbar"><div className="search-box"><Search size={18} /><input value={query} onChange={(e) => { setQuery(e.target.value); setPage(1) }} placeholder="Cari nama, nomor telepon, mitra, jabatan..." /></div></div>
       {error && <div className="error-box">{error}</div>}

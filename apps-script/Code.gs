@@ -144,12 +144,14 @@ function writeDashboard_(sheet, eventName, snapshot, partners) {
     ['Nama Event', eventName],
     ['Total Peserta', Number(snapshot.total_participants || 0)],
     ['Total Mitra', Number(snapshot.total_partners || partners.length || 0)],
+    ['Sudah Hadir', Number(snapshot.total_attended || 0)],
+    ['Belum Hadir', Number(snapshot.total_not_attended || 0)],
     ['Last Update', now]
   ];
   sheet.getRange(1, 1, values.length, 2).setValues(values);
   sheet.getRange('A1:B1').merge().setFontWeight('bold').setFontSize(14).setBackground('#10182F').setFontColor('#FFFFFF');
-  sheet.getRange('A2:A5').setFontWeight('bold').setBackground('#EAF2FF');
-  sheet.getRange('B2:B5').setBackground('#F8FAFF');
+  sheet.getRange('A2:A7').setFontWeight('bold').setBackground('#EAF2FF');
+  sheet.getRange('B2:B7').setBackground('#F8FAFF');
   sheet.setFrozenRows(1);
   sheet.setColumnWidth(1, 180);
   sheet.setColumnWidth(2, 320);
@@ -158,14 +160,17 @@ function writeDashboard_(sheet, eventName, snapshot, partners) {
 function writeParticipants_(sheet, participants) {
   if (sheet.getFilter()) sheet.getFilter().remove();
   sheet.clear();
-  const header = ['No', 'Waktu WITA', 'Nama Lengkap', 'No. Telp', 'Nama Mitra', 'Jabatan'];
+  const header = ['No', 'Waktu WITA', 'Nama Lengkap', 'No. Telp', 'Nama Mitra', 'Jabatan', 'Kode Registrasi', 'Kehadiran', 'Jam Check-in'];
   const rows = participants.map((p, index) => [
     index + 1,
     formatWita_(p.created_at),
     p.full_name || '',
     p.phone || '-',
     p.partner_name || '',
-    p.position || ''
+    p.position || '',
+    p.registration_code || '-',
+    p.attendance_status === 'ATTENDED' ? 'HADIR' : 'BELUM HADIR',
+    p.checked_in_at ? formatWita_(p.checked_in_at) : '-'
   ]);
 
   sheet.getRange(1, 1, 1, header.length).setValues([header]);

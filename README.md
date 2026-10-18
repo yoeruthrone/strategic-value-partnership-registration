@@ -1,100 +1,55 @@
-# Event Registration V1
+# SENA Registration Platform V3
 
-Web registrasi satu-hari untuk maksimum 200 peserta, sesuai scope yang sudah dikunci.
+Multi-event registration + QR attendance platform for SENA.
 
-## Fitur yang sudah disiapkan
+## V3 capabilities
+- Single internal admin (secret login)
+- Multi-event/project
+- Simple per-event form builder
+- Core fields always required: Nama Lengkap, No. Telepon, Email
+- Custom field types: text, number, dropdown, radio, checkbox, textarea
+- Phone + email unique per event (hard duplicate prevention)
+- Unique QR generated for every registration
+- QR download PNG/PDF
+- Lost QR recovery via phone OR email, no OTP, no ticket code
+- Per-event camera QR scanner + attendance confirmation
+- External viewer per event: Total Peserta / Hadir / Belum Hadir + Excel/PDF export
+- Dark mode default + light mode toggle
+- SENA brand palette + supplied SENA logo
+- Vercel SPA rewrite included
 
-- Public registration `/register`
-- 1 pendaftar utama + maksimal 10 anggota tim
-- Normalisasi uppercase, hapus special character, angka tetap dipertahankan
-- Normalisasi nomor telepon
-- Advisory duplicate warning: nama + asal mitra dan nomor telepon
-- Atomic registration lewat Supabase RPC
-- Maksimum 200 peserta ditegakkan di database
-- Success / welcome screen
-- Internal dashboard tanpa login via secret URL
-- Counter Total Peserta dan Total Mitra
-- Dashboard table flattened: semua anggota langsung muncul sebagai peserta
-- Timestamp penuh disimpan di DB, dashboard menampilkan jam WITA
-- Default newest first
-- Global search, sortable table, 20/50/100 pagination
-- Auto refresh via Supabase Realtime signal + fallback polling 15 detik
-- Manual Refresh
-- Menu Total Peserta dengan relasi UTAMA/ANGGOTA
-- Menu Total Mitra dengan participant count dan detail
-- Export Excel + PDF
-- Live Google Spreadsheet (1 fixed link) via Apps Script + Supabase Database Webhook
-- Futuristic dark UI, Poppins, Tailwind 4, mobile-first
+## Upgrade from current V2 database
+Because V3 changes the data model substantially and existing test data was approved for deletion:
 
-## 1. Buat Supabase project
+1. Run `supabase/maintenance/000_wipe_v2_data.sql`
+2. Run `supabase/migrations/003_v3_multi_event.sql`
+3. If admin secret is not set / you want to rotate it, edit and run `supabase/maintenance/001_set_admin_secret.sql`
 
-Gunakan Supabase Free. Buka SQL Editor dan jalankan:
+Migration 003 rebuilds event-related tables and preserves `dashboard_access`.
 
-`supabase/migrations/001_initial.sql`
-
-Setelah migration selesai, buat dashboard secret dengan menjalankan statement yang ada di bagian paling bawah file SQL. Gunakan string random yang panjang dan jangan commit secret itu ke GitHub.
-
-## 2. Environment
-
-Salin:
-
+## Local
 ```bash
 cp .env.example .env
-```
-
-Isi:
-
-```env
-VITE_SUPABASE_URL=https://PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=...
-VITE_EVENT_NAME=Strategic Value Partnership Anda
-VITE_EVENT_DATE=2026-10-01
-```
-
-`anon key` aman berada di frontend karena tabel peserta tidak diberi akses langsung. Public registration dan internal dashboard menggunakan RPC yang dibatasi di database.
-
-## 3. Jalankan lokal
-
-```bash
 npm install
 npm run dev
 ```
 
-## 4. URL
+## Routes
+- `/admin` — single admin login
+- `/admin/events` — all events
+- `/admin/events/:eventId` — event overview
+- `/admin/events/:eventId/participants`
+- `/admin/events/:eventId/attendance`
+- `/admin/events/:eventId/form`
+- `/admin/events/:eventId/settings`
+- `/e/:slug/register` — public registration
+- `/e/:slug/recover` — recover QR by phone/email
+- `/e/:slug/ticket/:token` — QR pass
+- `/view/:token` — external read-only dashboard + export
 
-Public registration:
-
-```text
-https://domainanda.com/register
-```
-
-Internal dashboard:
-
-```text
-https://domainanda.com/internal/YOUR_SECRET
-```
-
-Submenu otomatis:
-
-```text
-/internal/YOUR_SECRET/participants
-/internal/YOUR_SECRET/partners
-```
-
-## 5. QR umum
-
-QR cukup mengarah ke URL `/register`. QR tidak perlu disimpan di database dan tidak ada QR individual.
-
-## Catatan security
-
-Dashboard memang tidak memakai login sesuai requirement, tetapi data peserta tidak dibuka melalui public SELECT. Dashboard memakai secret URL yang divalidasi server-side lewat RPC. Tetap perlakukan URL tersebut sebagai rahasia internal.
-
-## Google Spreadsheet live sync
-
-Integrasi sudah disiapkan di folder `apps-script/`. Polanya adalah 1 spreadsheet dengan link tetap. Supabase tetap menjadi source of truth dan Database Webhook memicu Apps Script setiap ada registrasi baru.
-
-Ikuti panduan lengkap:
-
-`apps-script/README.md`
-
-Setelah spreadsheet dibuat, isi `VITE_SPREADSHEET_URL` di `.env` dengan link Google Sheet tersebut. Menu **Export > Spreadsheet** akan membuka link live yang sama.
+## Security notes
+- No service role key in frontend.
+- Public/admin data mutations happen via SECURITY DEFINER RPCs.
+- Admin secret remains server-validated against bcrypt hash.
+- External viewer is token-scoped to one event.
+- Recovery intentionally has no OTP per product decision; anyone knowing a registrant's phone/email could retrieve the QR. Use for intended event context only.

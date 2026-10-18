@@ -1,39 +1,8 @@
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { formatWitaTime } from './normalize'
-
-export function exportParticipantsExcel(rows, filename = 'peserta-event.xlsx') {
-  const data = rows.map((r, i) => ({
-    No: i + 1,
-    Waktu: formatWitaTime(r.created_at),
-    Nama: r.full_name,
-    'No. Telepon': r.phone || '-',
-    'Nama Mitra': r.partner_name,
-    Jabatan: r.position,
-  }))
-  const ws = XLSX.utils.json_to_sheet(data)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Seluruh Peserta')
-  XLSX.writeFile(wb, filename)
-}
-
-export function exportParticipantsPdf(rows, eventName = 'Event', filename = 'peserta-event.pdf') {
-  const doc = new jsPDF({ orientation: 'landscape' })
-  doc.setFontSize(16)
-  doc.text(`Laporan Peserta - ${eventName}`, 14, 16)
-  autoTable(doc, {
-    startY: 22,
-    head: [['No', 'Waktu', 'Nama', 'No. Telepon', 'Nama Mitra', 'Jabatan']],
-    body: rows.map((r, i) => [
-      i + 1,
-      formatWitaTime(r.created_at),
-      r.full_name,
-      r.phone || '-',
-      r.partner_name,
-      r.position,
-    ]),
-    styles: { fontSize: 8 },
-  })
-  doc.save(filename)
-}
+import { dateWita,timeWita,fieldValue } from './format'
+function flat(rows,fields=[]){return rows.map((r,i)=>{const out={No:i+1,Tanggal:dateWita(r.created_at),Waktu:timeWita(r.created_at),Nama:r.full_name,'No. Telepon':r.phone,Email:r.email,Kehadiran:r.attendance_status==='ATTENDED'?'HADIR':'BELUM HADIR','Tanggal Check-in':r.checked_in_at?dateWita(r.checked_in_at):'-','Waktu Check-in':r.checked_in_at?timeWita(r.checked_in_at):'-'};fields.forEach(f=>out[f.label]=fieldValue(r.custom_data?.[f.field_key]));return out})}
+export function exportExcel(rows,fields,eventName='event'){const ws=XLSX.utils.json_to_sheet(flat(rows,fields));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Peserta');XLSX.writeFile(wb,`${eventName.toLowerCase().replace(/\s+/g,'-')}-peserta.xlsx`)}
+export function exportPdf(rows,fields,eventName='Event'){const cols=['No','Tanggal','Waktu','Nama','No. Telepon','Email',...fields.map(f=>f.label),'Kehadiran','Tanggal Check-in','Waktu Check-in'];const data=flat(rows,fields);const doc=new jsPDF({orientation:'landscape'});doc.setFontSize(15);doc.text(`Laporan Peserta - ${eventName}`,14,15);autoTable(doc,{startY:21,head:[cols],body:data.map(r=>cols.map(c=>r[c]??'-')),styles:{fontSize:6.4}});doc.save(`${eventName.toLowerCase().replace(/\s+/g,'-')}-peserta.pdf`)}
+export function exportSummaryPdf(event,stats){const doc=new jsPDF();doc.setFontSize(18);doc.text(event.name,14,22);doc.setFontSize(11);doc.text(`Total Peserta: ${stats.total}`,14,38);doc.text(`Sudah Hadir: ${stats.attended}`,14,47);doc.text(`Belum Hadir: ${stats.not_attended}`,14,56);doc.save(`${event.slug}-summary.pdf`)}

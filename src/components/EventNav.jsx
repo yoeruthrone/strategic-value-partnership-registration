@@ -1,0 +1,2 @@
+import { NavLink,useParams } from 'react-router-dom'
+export default function EventNav(){const {eventId}=useParams();const b=`/admin/events/${eventId}`;return <div className="event-tabs"><NavLink end to={b}>Overview</NavLink><NavLink to={`${b}/participants`}>Participants</NavLink><NavLink to={`${b}/attendance`}>Attendance</NavLink><NavLink to={`${b}/form`}>Form Builder</NavLink><NavLink to={`${b}/settings`}>Settings</NavLink></div>}
