@@ -1,11 +1,11 @@
 import { useMemo,useState } from 'react'
 import { ArrowDownAZ,ArrowUpAZ,ChevronLeft,ChevronRight,RefreshCw,Search } from 'lucide-react'
 import { dateWita,timeWita,fieldValue } from '../utils/format'
+import AdminFileLink from './AdminFileLink'
 
 const maskPhone=(value='')=>{const v=String(value||'');if(!v)return '-';if(/[•*]/.test(v))return v;const last=v.slice(-4);return `${'•'.repeat(Math.max(v.length-4,0))}${last}`}
 const getValue=(r,key)=>{
-  if(key==='date')return new Date(r.created_at||0).getTime()
-  if(key==='time')return new Date(r.created_at||0).getTime()
+  if(key==='date'||key==='time')return new Date(r.created_at||0).getTime()
   if(key==='status')return r.attendance_status||''
   if(key==='checkin')return r.checked_in_at?new Date(r.checked_in_at).getTime():0
   if(key.startsWith('custom:'))return fieldValue(r.custom_data?.[key.slice(7)]).toLowerCase()
@@ -21,9 +21,7 @@ export default function RegistrationTable({rows=[],fields=[],onRefresh,showToolb
    if(attendance==='ATTENDED'&&r.attendance_status!=='ATTENDED')return false
    if(attendance==='NOT_ATTENDED'&&r.attendance_status==='ATTENDED')return false
    if(!q)return true
-   const haystack=privacyMode
-    ?[r.created_at,r.full_name,r.phone,r.attendance_status,r.checked_in_at].join(' ').toLowerCase()
-    :JSON.stringify(r).toLowerCase()
+   const haystack=privacyMode?[r.created_at,r.full_name,r.phone,r.attendance_status,r.checked_in_at].join(' ').toLowerCase():JSON.stringify(r).toLowerCase()
    return haystack.includes(q.toLowerCase())
  }),[rows,q,attendance,privacyMode])
  const sorted=useMemo(()=>[...filtered].sort((a,b)=>{const av=getValue(a,sort.key),bv=getValue(b,sort.key);if(av===bv)return 0;const n=av>bv?1:-1;return sort.direction==='asc'?n:-n}),[filtered,sort])
@@ -31,6 +29,6 @@ export default function RegistrationTable({rows=[],fields=[],onRefresh,showToolb
  function toggle(key){setPage(1);setSort(s=>s.key===key?{key,direction:s.direction==='asc'?'desc':'asc'}:{key,direction:key==='date'||key==='time'?'desc':'asc'})}
  return <section className={`registration-section ${privacyMode?'privacy-table':''}`}><div className="table-section-head"><div><h3>{title}</h3><p>{filtered.length} data ditemukan</p></div>{onRefresh&&<button className="btn secondary" onClick={onRefresh}><RefreshCw size={16}/> Refresh</button>}</div>
  {showToolbar&&<div className="table-toolbar"><div className="toolbar search-toolbar"><Search size={17}/><input placeholder="Cari seluruh data pendaftaran..." value={q} onChange={e=>{setQ(e.target.value);setPage(1)}}/></div><div className="table-toolbar-controls">{showAttendanceFilter&&<label className="attendance-filter">Check-in<select value={attendance} onChange={e=>{setAttendance(e.target.value);setPage(1)}}><option value="ALL">Semua</option><option value="ATTENDED">Sudah Check-in</option><option value="NOT_ATTENDED">Belum Check-in</option></select></label>}<label className="page-size">Tampilkan<select value={size} onChange={e=>{setSize(Number(e.target.value));setPage(1)}}>{[20,50,100,200].map(n=><option key={n} value={n}>{n}</option>)}</select></label></div></div>}
- <div className="table-scroll"><table><thead><tr>{columns.map(c=><th key={c.key}><div className="th-sort"><span>{c.label}</span><SortButton active={sort.key===c.key} direction={sort.direction} onClick={()=>toggle(c.key)}/></div></th>)}</tr></thead><tbody>{visible.map(r=><tr key={r.id}><td>{dateWita(r.created_at)}</td><td>{timeWita(r.created_at)}</td><td>{r.full_name}</td><td>{privacyMode?maskPhone(r.phone):r.phone}</td>{!privacyMode&&<td>{r.email}</td>}{!privacyMode&&fields.map(f=><td key={f.id}>{fieldValue(r.custom_data?.[f.field_key])||'-'}</td>)}<td><span className={`pill ${r.attendance_status==='ATTENDED'?'success':''}`}>{r.attendance_status==='ATTENDED'?'HADIR':'BELUM'}</span></td><td>{r.checked_in_at?`${dateWita(r.checked_in_at)} ${timeWita(r.checked_in_at)}`:'-'}</td></tr>)}{visible.length===0&&<tr><td colSpan={columns.length} className="table-empty">Belum ada data pendaftaran.</td></tr>}</tbody></table></div>
+ <div className="table-scroll"><table><thead><tr>{columns.map(c=><th key={c.key}><div className="th-sort"><span>{c.label}</span><SortButton active={sort.key===c.key} direction={sort.direction} onClick={()=>toggle(c.key)}/></div></th>)}</tr></thead><tbody>{visible.map(r=><tr key={r.id}><td>{dateWita(r.created_at)}</td><td>{timeWita(r.created_at)}</td><td>{r.full_name}</td><td>{privacyMode?maskPhone(r.phone):r.phone}</td>{!privacyMode&&<td>{r.email}</td>}{!privacyMode&&fields.map(f=><td key={f.id}>{f.field_type==='file'?<AdminFileLink file={r.custom_data?.[f.field_key]}/>:fieldValue(r.custom_data?.[f.field_key])||'-'}</td>)}<td><span className={`pill ${r.attendance_status==='ATTENDED'?'success':''}`}>{r.attendance_status==='ATTENDED'?'HADIR':'BELUM'}</span></td><td>{r.checked_in_at?`${dateWita(r.checked_in_at)} ${timeWita(r.checked_in_at)}`:'-'}</td></tr>)}{visible.length===0&&<tr><td colSpan={columns.length} className="table-empty">Belum ada data pendaftaran.</td></tr>}</tbody></table></div>
  <div className="pagination"><span>Halaman {safePage} dari {pages}</span><div><button className="icon-btn" disabled={safePage<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}><ChevronLeft size={17}/></button><button className="icon-btn" disabled={safePage>=pages} onClick={()=>setPage(p=>Math.min(pages,p+1))}><ChevronRight size={17}/></button></div></div></section>
 }

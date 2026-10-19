@@ -53,3 +53,19 @@ npm run dev
 - Admin secret remains server-validated against bcrypt hash.
 - External viewer is token-scoped to one event.
 - Recovery intentionally has no OTP per product decision; anyone knowing a registrant's phone/email could retrieve the QR. Use for intended event context only.
+
+## V3.1 UI + Form Logic upgrade
+See `V3_1_SETUP.md` and run the additive migration `004_v3_1_branding_logic_tables.sql` on an existing V3 database. This upgrade does not wipe registrations.
+
+## V3.1.2
+Run `supabase/migrations/005_v3_1_2_field_descriptions.sql` after V3.1.1. Adds optional helper text to all fields and mobile overflow fixes without deleting data.
+
+## V3.1.6 final pre-production polish
+Run `supabase/migrations/006_v3_1_6_privacy_recovery.sql` on an existing V3.1.5 database. This release adds admin check-in filtering, double-check QR recovery (phone + email), upload dimension guidance, SENA favicon, and a privacy-limited external viewer with masked phone numbers and no export buttons.
+
+## V3.2
+Per-event public color theme, custom private image/PDF upload fields (1 MB), reference images on custom fields, and normalized image-safe public form spacing. See `V3_2_SETUP.md`.
+
+
+## V3.2.1
+Minor public form polish: clean registration header, Senapro footer, Date/Calendar custom field, and no event-logo fallback when no logo is configured.

@@ -136,3 +136,35 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden}.admin-shell,.admin-
   .viewer-main .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
   .viewer-main .progress-card{margin-bottom:18px}
 }
+
+/* V3.2 — per-event theme, file fields, reference images, normalized public form spacing */
+.branded-public{--event-primary:var(--blue);--event-accent:var(--pink);--event-secondary:var(--purple)}
+.branded-public .btn.primary{background:linear-gradient(120deg,var(--event-secondary),var(--event-accent));border-color:transparent}
+.branded-public a,.branded-public .eyebrow{color:var(--event-primary)}
+.branded-public input:focus,.branded-public select:focus,.branded-public textarea:focus{border-color:var(--event-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--event-primary) 14%,transparent)}
+.branded-public .event-tabs a.active{background:var(--event-secondary);border-color:var(--event-secondary)}
+.branded-public .progress i{background:linear-gradient(90deg,var(--event-primary),var(--event-accent))}
+
+.theme-settings{margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}
+.theme-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.theme-settings-head h3{margin-bottom:5px}.theme-settings-head p{margin-bottom:0}
+.theme-color-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.color-input-row{display:grid;grid-template-columns:52px 1fr;gap:8px}.color-input-row input[type=color]{padding:4px;height:44px;cursor:pointer}
+.theme-preview-row{display:flex;align-items:center;gap:10px;margin-top:12px}.theme-dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--line)}.theme-dot.primary{background:var(--event-primary)}.theme-dot.accent{background:var(--event-accent)}.theme-dot.secondary{background:var(--event-secondary)}
+
+.reference-editor{margin-top:10px;padding:12px;border:1px dashed var(--line);border-radius:13px;background:color-mix(in srgb,var(--surface2) 60%,transparent);display:grid;gap:10px}.reference-editor>div:first-child{display:grid;gap:2px}.reference-editor span{font-size:.62rem;color:var(--muted);font-weight:400}.reference-editor img{width:min(100%,300px);height:150px;object-fit:contain;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px}.inline-setting{margin-top:9px;max-width:260px}.inline-setting select{padding:9px 10px}.file-rule-box{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:flex-start;margin:0 0 16px;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--surface2)}.file-rule-box p{font-size:.65rem;line-height:1.5;margin:4px 0 10px}.file-rule-box label{margin:0!important}
+
+.public-form-stack{gap:0}.public-field-block{display:grid;gap:12px;padding:0 0 26px;margin:0 0 26px;border-bottom:1px solid color-mix(in srgb,var(--line) 72%,transparent)}.public-field-block:last-child{margin-bottom:8px}.public-field-copy{display:grid;gap:5px}.field-block-label{display:block;color:var(--muted);font-size:.76rem;font-weight:600}.public-field-block .field-helper{margin:0}.field-control{min-width:0}.field-reference{width:100%;display:flex;justify-content:flex-start;padding:2px 0}.field-reference img{display:block;width:min(100%,420px);max-height:280px;object-fit:contain;object-position:left center;border:1px solid var(--line);border-radius:14px;background:var(--surface2);padding:8px}.public-field-block .choice-row{margin-top:0}
+.upload-control{width:100%}.upload-drop{display:flex;min-height:118px;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:5px;border:1px dashed color-mix(in srgb,var(--event-primary) 48%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--event-primary) 5%,var(--surface2));cursor:pointer;padding:18px}.upload-drop:hover{border-color:var(--event-primary);background:color-mix(in srgb,var(--event-primary) 8%,var(--surface2))}.upload-drop input{display:none}.upload-drop strong{color:var(--text);font-size:.78rem}.upload-drop span{font-size:.63rem;color:var(--muted);font-weight:400}.selected-file{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid var(--line);border-radius:14px;background:var(--surface2);padding:12px}.selected-file-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--event-primary) 12%,var(--surface));color:var(--event-primary)}.selected-file>div:nth-child(2){display:grid;min-width:0}.selected-file strong{font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.selected-file span{font-size:.62rem;color:var(--muted)}
+.file-open-btn{display:inline-flex;align-items:center;gap:6px;max-width:180px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--blue);padding:6px 9px;font-size:.65rem}.file-open-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spin{animation:spin .8s linear infinite}
+
+@media(max-width:650px){
+ .theme-settings-head{display:grid}.theme-settings-head .btn{width:max-content}.theme-color-grid{grid-template-columns:1fr}.color-input-row{grid-template-columns:48px 1fr}
+ .public-field-block{padding-bottom:22px;margin-bottom:22px;gap:10px}.field-reference img{width:100%;max-height:230px;object-position:center}.field-reference{justify-content:center}.upload-drop{min-height:108px;padding:16px 12px}.reference-editor img{width:100%;height:140px}
+}
+
+/* V3.2.1 public registration header/footer polish */
+.registration-public-top{justify-content:flex-end}
+.public-footer{width:min(100%,760px);margin:18px auto 0;padding:18px 16px 8px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:.72rem}
+.public-footer img{width:auto;height:24px;max-width:88px;object-fit:contain}
+.public-footer a{color:var(--event-primary,var(--blue));font-weight:600;text-decoration:none}
+.public-footer a:hover{text-decoration:underline}
+@media(max-width:650px){.public-footer{margin-top:14px;padding:16px 12px 6px;font-size:.68rem}.public-footer img{height:21px}}
