@@ -93,3 +93,46 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden}.admin-shell,.admin-
   .builder-grid > .panel > label{margin-bottom:18px}
   .builder-grid > .panel > .check{margin:4px 0 20px}
 }
+
+/* V3.1.5 — admin secret visibility + 1 hour session */
+.secret-input-wrap{position:relative;width:100%}
+.secret-input-wrap input{padding-right:46px}
+.secret-eye-btn{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--muted);padding:0}
+.secret-eye-btn:hover,.secret-eye-btn:focus-visible{color:var(--blue);background:rgba(0,159,238,.09);outline:none}
+
+/* V3.1.6 — attendance filters, upload guidance, external viewer privacy/layout */
+.table-toolbar-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.attendance-filter{display:flex;grid-template-columns:none;align-items:center;gap:8px;white-space:nowrap}
+.attendance-filter select{width:auto;min-width:150px;padding:9px 10px}
+.asset-hint{display:block;color:var(--muted);font-size:.62rem;font-weight:400;line-height:1.45;min-height:2.8em}
+.viewer-head{max-width:1440px;padding:28px 32px 12px}
+.viewer-main{max-width:1440px;padding:20px 32px 56px}
+.viewer-main>.event-brand-hero{margin-bottom:24px}
+.viewer-main .stats-grid{margin-top:0;margin-bottom:18px;gap:16px}
+.viewer-main .progress-card{margin-bottom:24px}
+.viewer-main .registration-section{margin-top:0}
+.viewer-main .table-section-head{margin-bottom:14px}
+.viewer-main .table-toolbar{margin-bottom:14px}
+.privacy-table table{min-width:760px}
+.privacy-table .table-scroll{box-shadow:0 10px 32px rgba(0,0,0,.08)}
+
+@media(max-width:800px){
+  .table-toolbar-controls{width:100%;justify-content:space-between}
+  .attendance-filter{flex:1;min-width:190px}
+  .attendance-filter select{flex:1;min-width:0}
+  .page-size{margin-left:auto}
+  .viewer-head{padding:18px 16px 8px}
+  .viewer-main{padding:14px 16px 36px}
+  .viewer-main>.event-brand-hero{margin-bottom:18px}
+}
+
+@media(max-width:650px){
+  .table-toolbar-controls{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .attendance-filter{min-width:0;width:100%}
+  .attendance-filter select{width:100%}
+  .asset-hint{min-height:0}
+  .viewer-head{padding:14px 12px 6px}
+  .viewer-main{padding:12px 12px 30px}
+  .viewer-main .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .viewer-main .progress-card{margin-bottom:18px}
+}

@@ -1,4 +1,40 @@
-import { Navigate,Route,Routes } from 'react-router-dom'
-import AdminLoginPage from './pages/AdminLoginPage';import EventsPage from './pages/EventsPage';import EventOverviewPage from './pages/EventOverviewPage';import ParticipantsPage from './pages/ParticipantsPage';import AttendancePage from './pages/AttendancePage';import FormBuilderPage from './pages/FormBuilderPage';import EventSettingsPage from './pages/EventSettingsPage';import RegisterPage from './pages/RegisterPage';import RecoverPage from './pages/RecoverPage';import TicketPage from './pages/TicketPage';import ExternalViewerPage from './pages/ExternalViewerPage';import AdminShell from './components/AdminShell'
-function Guard({children}){return sessionStorage.getItem('sena_admin_secret')?children:<Navigate to="/admin" replace/>}
-export default function App(){return <Routes><Route path="/" element={<Navigate to="/admin" replace/>}/><Route path="/admin" element={<AdminLoginPage/>}/><Route path="/admin" element={<Guard><AdminShell/></Guard>}><Route path="events" element={<EventsPage/>}/><Route path="events/:eventId" element={<EventOverviewPage/>}/><Route path="events/:eventId/participants" element={<ParticipantsPage/>}/><Route path="events/:eventId/attendance" element={<AttendancePage/>}/><Route path="events/:eventId/form" element={<FormBuilderPage/>}/><Route path="events/:eventId/settings" element={<EventSettingsPage/>}/></Route><Route path="/e/:slug/register" element={<RegisterPage/>}/><Route path="/e/:slug/recover" element={<RecoverPage/>}/><Route path="/e/:slug/ticket/:token" element={<TicketPage/>}/><Route path="/view/:token" element={<ExternalViewerPage/>}/><Route path="*" element={<Navigate to="/admin" replace/>}/></Routes>}
+import { Navigate, Route, Routes } from 'react-router-dom'
+import AdminLoginPage from './pages/AdminLoginPage'
+import EventsPage from './pages/EventsPage'
+import EventOverviewPage from './pages/EventOverviewPage'
+import ParticipantsPage from './pages/ParticipantsPage'
+import AttendancePage from './pages/AttendancePage'
+import FormBuilderPage from './pages/FormBuilderPage'
+import EventSettingsPage from './pages/EventSettingsPage'
+import RegisterPage from './pages/RegisterPage'
+import RecoverPage from './pages/RecoverPage'
+import TicketPage from './pages/TicketPage'
+import ExternalViewerPage from './pages/ExternalViewerPage'
+import AdminShell from './components/AdminShell'
+import { getAdminSession } from './lib/adminSession'
+
+function Guard({ children }) {
+  return getAdminSession() ? children : <Navigate to="/admin" replace />
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/admin" replace />} />
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route path="/admin" element={<Guard><AdminShell /></Guard>}>
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:eventId" element={<EventOverviewPage />} />
+        <Route path="events/:eventId/participants" element={<ParticipantsPage />} />
+        <Route path="events/:eventId/attendance" element={<AttendancePage />} />
+        <Route path="events/:eventId/form" element={<FormBuilderPage />} />
+        <Route path="events/:eventId/settings" element={<EventSettingsPage />} />
+      </Route>
+      <Route path="/e/:slug/register" element={<RegisterPage />} />
+      <Route path="/e/:slug/recover" element={<RecoverPage />} />
+      <Route path="/e/:slug/ticket/:token" element={<TicketPage />} />
+      <Route path="/view/:token" element={<ExternalViewerPage />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
+    </Routes>
+  )
+}
