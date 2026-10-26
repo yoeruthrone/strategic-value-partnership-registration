@@ -12,11 +12,11 @@ const getValue=(r,key)=>{
   return String(r[key]??'').toLowerCase()
 }
 function SortButton({active,direction,onClick}){return <button className={`sort-btn ${active?'active':''}`} onClick={onClick} title="Urutkan kolom">{active&&direction==='asc'?<ArrowUpAZ size={14}/>:<ArrowDownAZ size={14}/>}</button>}
-export default function RegistrationTable({rows=[],fields=[],onRefresh,showToolbar=true,title='Data Pendaftaran',privacyMode=false,showAttendanceFilter=true}){
+export default function RegistrationTable({rows=[],fields=[],onRefresh,showToolbar=true,title='Data Pendaftaran',privacyMode=false,showAttendanceFilter=true,coreLabels={name:'Nama',phone:'No. Telepon',email:'Email'}}){
  const [q,setQ]=useState('');const [attendance,setAttendance]=useState('ALL');const [sort,setSort]=useState({key:'date',direction:'desc'});const [size,setSize]=useState(20);const [page,setPage]=useState(1)
  const columns=privacyMode
-  ?[{key:'date',label:'Tanggal'},{key:'time',label:'Waktu'},{key:'full_name',label:'Nama'},{key:'phone',label:'No. Telepon'},{key:'status',label:'Status'},{key:'checkin',label:'Check-in'}]
-  :[{key:'date',label:'Tanggal'},{key:'time',label:'Waktu'},{key:'full_name',label:'Nama'},{key:'participant_role',label:'Tipe'},{key:'leader_name',label:'Leader'},{key:'phone',label:'No. Telepon'},{key:'email',label:'Email'},...fields.map(f=>({key:`custom:${f.field_key}`,label:f.label,field:f})),{key:'status',label:'Status'},{key:'checkin',label:'Check-in'}]
+  ?[{key:'date',label:'Tanggal'},{key:'time',label:'Waktu'},{key:'full_name',label:coreLabels.name},{key:'phone',label:coreLabels.phone},{key:'status',label:'Status'},{key:'checkin',label:'Check-in'}]
+  :[{key:'date',label:'Tanggal'},{key:'time',label:'Waktu'},{key:'full_name',label:coreLabels.name},{key:'participant_role',label:'Tipe'},{key:'leader_name',label:'Leader'},{key:'phone',label:coreLabels.phone},{key:'email',label:coreLabels.email},...fields.map(f=>({key:`custom:${f.field_key}`,label:f.label,field:f})),{key:'status',label:'Status'},{key:'checkin',label:'Check-in'}]
  const filtered=useMemo(()=>rows.filter(r=>{
    if(attendance==='ATTENDED'&&r.attendance_status!=='ATTENDED')return false
    if(attendance==='NOT_ATTENDED'&&r.attendance_status==='ATTENDED')return false

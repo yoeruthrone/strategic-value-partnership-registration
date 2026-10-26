@@ -1,3 +1,6 @@
+## V3.4.2
+Per-event configurable additional-participant limit (2-10) and editable section label.
+
 # SENA Registration Platform V3
 
 Multi-event registration + QR attendance platform for SENA.
@@ -69,3 +72,13 @@ Per-event public color theme, custom private image/PDF upload fields (1 MB), ref
 
 ## V3.2.1
 Minor public form polish: clean registration header, Senapro footer, Date/Calendar custom field, and no event-logo fallback when no logo is configured.
+
+## V3.3 — Leader + Guests
+V3.3 adds leader + guest registration (maximum 10 guests), with one QR for the leader and group check-in. Run `supabase/migrations/009_v3_3_group_registration.sql` on top of V3.2.1.
+
+## V3.4.1
+Guest rows now inherit leader custom-field values in admin tables and exports while still only collecting core guest identity fields in the public form. Migration 011 also backfills existing guest rows.
+
+
+## V3.4.4
+Active custom fields can be renamed safely without changing their internal field keys. No SQL migration required.

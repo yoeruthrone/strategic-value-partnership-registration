@@ -54,7 +54,7 @@ export default function FormBuilderPage(){
   const [key,...rest]=value.split(':::')
   await upsert({...field,show_if_field_key:key,show_if_value:rest.join(':::')})
  }
- async function saveCoreDescription(key,value){
+ async function saveCoreSetting(key,value){
   const patch={[key]:value}
   const {error}=await supabase.rpc('v3_admin_event_update',{p_secret:secret(),p_event_id:eventId,p_patch:patch})
   if(error)alert(error.message);else setEvent(prev=>({...prev,...patch}))
@@ -95,14 +95,19 @@ export default function FormBuilderPage(){
   <div className="builder-grid">
    <section className="panel">
     <div className="builder-title-row"><h3>Core Fields</h3>{ordering&&<span className="ordering-status"><Loader2 size={14}/> Menyimpan urutan...</span>}</div>
-    {[{label:'NAMA LENGKAP',key:'name_description',value:event?.name_description||''},{label:'NO. TELEPON',key:'phone_description',value:event?.phone_description||''},{label:'EMAIL',key:'email_description',value:event?.email_description||''}].map(x=><div className="field-row locked core-field-row" key={x.key}><GripVertical size={16}/><div className="field-meta"><strong>{x.label}</strong><span>REQUIRED • CORE</span><textarea className="field-description-input" rows="2" defaultValue={x.value} placeholder="Deskripsi / helper text (opsional)" onBlur={e=>saveCoreDescription(x.key,e.target.value)}/></div></div>)}
+    {[
+      {defaultLabel:'NAMA LENGKAP',labelKey:'name_label',label:event?.name_label||'Nama Lengkap',descriptionKey:'name_description',description:event?.name_description||''},
+      {defaultLabel:'NO. TELEPON',labelKey:'phone_label',label:event?.phone_label||'No. Telepon',descriptionKey:'phone_description',description:event?.phone_description||''},
+      {defaultLabel:'EMAIL',labelKey:'email_label',label:event?.email_label||'Email',descriptionKey:'email_description',description:event?.email_description||''}
+    ].map(x=><div className="field-row locked core-field-row" key={x.labelKey}><GripVertical size={16}/><div className="field-meta"><strong>{x.defaultLabel}</strong><span>REQUIRED • CORE • INTERNAL KEY TETAP</span><label className="core-label-editor">Label tampil<input value={x.label} placeholder={x.defaultLabel} onChange={e=>setEvent(prev=>({...prev,[x.labelKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.labelKey,e.target.value)}/></label><textarea className="field-description-input" rows="2" value={x.description} placeholder="Deskripsi / helper text (opsional)" onChange={e=>setEvent(prev=>({...prev,[x.descriptionKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.descriptionKey,e.target.value)}/></div></div>)}
 
     <h3 className="mt">Custom Fields</h3>
     {fields.map(f=><div className={`field-row field-row-builder draggable-field ${draggedId===f.id?'dragging':''}`} key={f.id} draggable={!ordering} onDragStart={e=>{setDraggedId(f.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',f.id)}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect='move'}} onDrop={e=>{e.preventDefault();dropOn(f.id)}} onDragEnd={()=>setDraggedId(null)}>
       <span className="drag-handle" title="Drag untuk mengubah urutan"><GripVertical size={18}/></span>
       <div className="field-meta">
-       <strong>{f.label}</strong>
+       <label className="custom-label-editor">Label tampil<input defaultValue={f.label} placeholder="Nama field" onBlur={async e=>{const next=e.target.value.trim();if(!next){e.target.value=f.label;return alert('Label field tidak boleh kosong.')}if(next!==f.label)await upsert({...f,label:next})}}/></label>
        <span>{typeLabels[f.field_type]||f.field_type}{f.required?' • REQUIRED':''}{f.show_if_field_key?` • CONDITIONAL: ${f.show_if_value||'YA'}`:''}{f.field_type==='file'?` • ${fileTypeLabels[f.allowed_file_type||'image_pdf']} • MAX 1 MB`:''}</span>
+       <span className="field-key-lock">KEY: {f.field_key} • INTERNAL KEY TETAP</span>
        {isTrigger(f)&&<div className="conditional-options-preview"><GitBranch size={14}/><span>{(f.options||[]).join(' / ')}</span></div>}
        <textarea className="field-description-input" rows="2" defaultValue={f.description||''} placeholder="Deskripsi / helper text (opsional)" onBlur={e=>upsert({...f,description:e.target.value})}/>
        {f.field_type==='file'&&<label className="inline-setting">Allowed File<select value={f.allowed_file_type||'image_pdf'} onChange={e=>upsert({...f,allowed_file_type:e.target.value})}><option value="image">Image only</option><option value="pdf">PDF only</option><option value="image_pdf">Image + PDF</option></select></label>}

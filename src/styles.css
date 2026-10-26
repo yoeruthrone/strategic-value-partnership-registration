@@ -183,3 +183,13 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden}.admin-shell,.admin-
 .conditional-choice-builder{display:grid;gap:10px;margin-bottom:12px}.conditional-choice-builder .builder-note{margin-bottom:0}.conditional-choice-builder label{margin:0}
 .archived-fields{margin-top:26px;padding-top:22px;border-top:1px solid var(--line)}.archived-fields>.muted{font-size:.68rem;line-height:1.55;margin:-4px 0 12px}.archived-field-row{opacity:.78;background:color-mix(in srgb,var(--surface2) 68%,transparent)}.compact-btn{padding:7px 10px;font-size:.65rem;white-space:nowrap}
 .archive-data-note{display:flex;align-items:center;gap:8px;padding:10px 12px;margin:0 0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font-size:.68rem;color:var(--muted)}
+
+.core-label-editor{display:grid;gap:6px;margin-top:8px;font-size:12px;font-weight:700;max-width:420px}.core-label-editor input{width:100%}
+
+/* V3.4.4 — editable active custom-field labels */
+.custom-label-editor{display:grid;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.custom-label-editor input{width:min(460px,100%);font-size:15px;font-weight:700;letter-spacing:0;text-transform:none}
+.field-key-lock{font-size:10px!important;letter-spacing:.06em;opacity:.72}
+
+/* V3.4.5 — optional registration intro */
+.event-intro-editor{display:flex;flex-direction:column;gap:7px;margin:18px 0}.event-intro-editor textarea{min-height:110px;resize:vertical}.event-intro-editor small{color:var(--muted);font-size:.7rem;line-height:1.45}.registration-intro{margin:0 0 22px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--event-primary,#009FEE) 28%,var(--border));border-radius:16px;background:color-mix(in srgb,var(--event-primary,#009FEE) 7%,transparent);font-size:.84rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
