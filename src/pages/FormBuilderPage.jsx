@@ -21,6 +21,7 @@ export default function FormBuilderPage(){
  const [archived,setArchived]=useState([])
  const [draft,setDraft]=useState(emptyDraft())
  const [draggedId,setDraggedId]=useState(null)
+ const [draggedCore,setDraggedCore]=useState(null)
  const [ordering,setOrdering]=useState(false)
  const [imageBusy,setImageBusy]=useState('')
 
@@ -31,6 +32,16 @@ export default function FormBuilderPage(){
  }
  useEffect(()=>{load()},[eventId])
  const triggers=useMemo(()=>fields.filter(isTrigger),[fields])
+
+ const defaultCoreOrder=['full_name','phone','email']
+ const coreOrder=Array.isArray(event?.core_field_order)&&event.core_field_order.length===3?event.core_field_order:defaultCoreOrder
+ const coreDefs={
+  full_name:{key:'full_name',defaultLabel:'NAMA LENGKAP',labelKey:'name_label',label:event?.name_label||'Nama Lengkap',descriptionKey:'name_description',description:event?.name_description||''},
+  phone:{key:'phone',defaultLabel:'NO. TELEPON',labelKey:'phone_label',label:event?.phone_label||'No. Telepon',descriptionKey:'phone_description',description:event?.phone_description||''},
+  email:{key:'email',defaultLabel:'EMAIL',labelKey:'email_label',label:event?.email_label||'Email',descriptionKey:'email_description',description:event?.email_description||''}
+ }
+ const orderedCore=coreOrder.map(k=>coreDefs[k]).filter(Boolean)
+
 
  async function upsert(f,shouldReload=true){
   const payload={...f,description:f.description||'',options:Array.isArray(f.options)?f.options:[],sort_order:f.sort_order||10,show_if_field_key:f.show_if_field_key||null,show_if_value:f.show_if_value||null,allowed_file_type:f.allowed_file_type||'image_pdf',reference_image_data_url:f.reference_image_data_url||null}
@@ -58,6 +69,19 @@ export default function FormBuilderPage(){
   const patch={[key]:value}
   const {error}=await supabase.rpc('v3_admin_event_update',{p_secret:secret(),p_event_id:eventId,p_patch:patch})
   if(error)alert(error.message);else setEvent(prev=>({...prev,...patch}))
+ }
+ async function saveCoreOrder(next){
+  const patch={core_field_order:next}
+  const previous=coreOrder
+  setEvent(prev=>({...prev,...patch}))
+  const {error}=await supabase.rpc('v3_admin_event_update',{p_secret:secret(),p_event_id:eventId,p_patch:patch})
+  if(error){alert(error.message);setEvent(prev=>({...prev,core_field_order:previous}))}
+ }
+ function dropCoreOn(targetKey){
+  if(!draggedCore||draggedCore===targetKey){setDraggedCore(null);return}
+  const from=coreOrder.indexOf(draggedCore),to=coreOrder.indexOf(targetKey)
+  if(from<0||to<0){setDraggedCore(null);return}
+  const next=[...coreOrder];const [moved]=next.splice(from,1);next.splice(to,0,moved);setDraggedCore(null);saveCoreOrder(next)
  }
  async function archiveField(id){
   if(!confirm('Arsipkan field ini? Field akan hilang dari form baru, tetapi data peserta lama tetap tersimpan dan bisa ditampilkan kembali.'))return
@@ -101,11 +125,8 @@ export default function FormBuilderPage(){
   <div className="builder-grid">
    <section className="panel">
     <div className="builder-title-row"><h3>Core Fields</h3>{ordering&&<span className="ordering-status"><Loader2 size={14}/> Menyimpan urutan...</span>}</div>
-    {[
-      {defaultLabel:'NAMA LENGKAP',labelKey:'name_label',label:event?.name_label||'Nama Lengkap',descriptionKey:'name_description',description:event?.name_description||''},
-      {defaultLabel:'NO. TELEPON',labelKey:'phone_label',label:event?.phone_label||'No. Telepon',descriptionKey:'phone_description',description:event?.phone_description||''},
-      {defaultLabel:'EMAIL',labelKey:'email_label',label:event?.email_label||'Email',descriptionKey:'email_description',description:event?.email_description||''}
-    ].map(x=><div className="field-row locked core-field-row" key={x.labelKey}><GripVertical size={16}/><div className="field-meta"><strong>{x.defaultLabel}</strong><span>REQUIRED • CORE • INTERNAL KEY TETAP</span><label className="core-label-editor">Label tampil<input value={x.label} placeholder={x.defaultLabel} onChange={e=>setEvent(prev=>({...prev,[x.labelKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.labelKey,e.target.value)}/></label><textarea className="field-description-input" rows="2" value={x.description} placeholder="Deskripsi / helper text (opsional)" onChange={e=>setEvent(prev=>({...prev,[x.descriptionKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.descriptionKey,e.target.value)}/></div></div>)}
+    {orderedCore.map(x=><div className={`field-row locked core-field-row core-draggable ${draggedCore===x.key?'dragging':''}`} key={x.key} draggable onDragStart={e=>{setDraggedCore(x.key);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',x.key)}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect='move'}} onDrop={e=>{e.preventDefault();dropCoreOn(x.key)}} onDragEnd={()=>setDraggedCore(null)}><span className="drag-handle" title="Drag untuk mengubah urutan core field"><GripVertical size={16}/></span><div className="field-meta"><strong>{x.defaultLabel}</strong><span>REQUIRED • CORE • INTERNAL KEY TETAP</span><label className="core-label-editor">Label tampil<input value={x.label} placeholder={x.defaultLabel} onChange={e=>setEvent(prev=>({...prev,[x.labelKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.labelKey,e.target.value)}/></label><textarea className="field-description-input" rows="2" value={x.description} placeholder="Deskripsi / helper text (opsional)" onChange={e=>setEvent(prev=>({...prev,[x.descriptionKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.descriptionKey,e.target.value)}/></div></div>)}
+    <p className="builder-order-hint"><GripVertical size={13}/> Drag untuk mengubah urutan 3 core field. Core field tetap berada di atas Custom Fields.</p>
 
     <h3 className="mt">Custom Fields</h3>
     {fields.map(f=><div className={`field-row field-row-builder draggable-field ${draggedId===f.id?'dragging':''}`} key={f.id} draggable={!ordering} onDragStart={e=>{setDraggedId(f.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',f.id)}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect='move';autoScrollDrag(e)}} onDrop={e=>{e.preventDefault();dropOn(f.id)}} onDragEnd={()=>setDraggedId(null)}>
