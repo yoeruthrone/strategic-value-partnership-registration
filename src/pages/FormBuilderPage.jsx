@@ -73,6 +73,12 @@ export default function FormBuilderPage(){
   try{for(let i=0;i<next.length;i++){const ok=await upsert({...next[i],sort_order:(i+1)*10},false);if(!ok)throw new Error('order')}await load()}
   catch{await load()}finally{setOrdering(false);setDraggedId(null)}
  }
+ function autoScrollDrag(e){
+  const edge=80
+  const speed=22
+  if(e.clientY<edge)window.scrollBy({top:-speed,left:0,behavior:'auto'})
+  else if(e.clientY>window.innerHeight-edge)window.scrollBy({top:speed,left:0,behavior:'auto'})
+ }
  function dropOn(targetId){
   if(!draggedId||draggedId===targetId||ordering){setDraggedId(null);return}
   const from=fields.findIndex(f=>f.id===draggedId),to=fields.findIndex(f=>f.id===targetId)
@@ -102,12 +108,13 @@ export default function FormBuilderPage(){
     ].map(x=><div className="field-row locked core-field-row" key={x.labelKey}><GripVertical size={16}/><div className="field-meta"><strong>{x.defaultLabel}</strong><span>REQUIRED • CORE • INTERNAL KEY TETAP</span><label className="core-label-editor">Label tampil<input value={x.label} placeholder={x.defaultLabel} onChange={e=>setEvent(prev=>({...prev,[x.labelKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.labelKey,e.target.value)}/></label><textarea className="field-description-input" rows="2" value={x.description} placeholder="Deskripsi / helper text (opsional)" onChange={e=>setEvent(prev=>({...prev,[x.descriptionKey]:e.target.value}))} onBlur={e=>saveCoreSetting(x.descriptionKey,e.target.value)}/></div></div>)}
 
     <h3 className="mt">Custom Fields</h3>
-    {fields.map(f=><div className={`field-row field-row-builder draggable-field ${draggedId===f.id?'dragging':''}`} key={f.id} draggable={!ordering} onDragStart={e=>{setDraggedId(f.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',f.id)}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect='move'}} onDrop={e=>{e.preventDefault();dropOn(f.id)}} onDragEnd={()=>setDraggedId(null)}>
+    {fields.map(f=><div className={`field-row field-row-builder draggable-field ${draggedId===f.id?'dragging':''}`} key={f.id} draggable={!ordering} onDragStart={e=>{setDraggedId(f.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',f.id)}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect='move';autoScrollDrag(e)}} onDrop={e=>{e.preventDefault();dropOn(f.id)}} onDragEnd={()=>setDraggedId(null)}>
       <span className="drag-handle" title="Drag untuk mengubah urutan"><GripVertical size={18}/></span>
       <div className="field-meta">
        <label className="custom-label-editor">Label tampil<input defaultValue={f.label} placeholder="Nama field" onBlur={async e=>{const next=e.target.value.trim();if(!next){e.target.value=f.label;return alert('Label field tidak boleh kosong.')}if(next!==f.label)await upsert({...f,label:next})}}/></label>
-       <span>{typeLabels[f.field_type]||f.field_type}{f.required?' • REQUIRED':''}{f.show_if_field_key?` • CONDITIONAL: ${f.show_if_value||'YA'}`:''}{f.field_type==='file'?` • ${fileTypeLabels[f.allowed_file_type||'image_pdf']} • MAX 1 MB`:''}</span>
+       <span>{typeLabels[f.field_type]||f.field_type}{f.required?' • REQUIRED':' • OPTIONAL'}{f.show_if_field_key?` • CONDITIONAL: ${f.show_if_value||'YA'}`:''}{f.field_type==='file'?` • ${fileTypeLabels[f.allowed_file_type||'image_pdf']} • MAX 1 MB`:''}</span>
        <span className="field-key-lock">KEY: {f.field_key} • INTERNAL KEY TETAP</span>
+       <label className="check inline-required-toggle"><input type="checkbox" checked={!!f.required} onChange={e=>upsert({...f,required:e.target.checked})} disabled={ordering}/> Wajib diisi</label>
        {isTrigger(f)&&<div className="conditional-options-preview"><GitBranch size={14}/><span>{(f.options||[]).join(' / ')}</span></div>}
        <textarea className="field-description-input" rows="2" defaultValue={f.description||''} placeholder="Deskripsi / helper text (opsional)" onBlur={e=>upsert({...f,description:e.target.value})}/>
        {f.field_type==='file'&&<label className="inline-setting">Allowed File<select value={f.allowed_file_type||'image_pdf'} onChange={e=>upsert({...f,allowed_file_type:e.target.value})}><option value="image">Image only</option><option value="pdf">PDF only</option><option value="image_pdf">Image + PDF</option></select></label>}

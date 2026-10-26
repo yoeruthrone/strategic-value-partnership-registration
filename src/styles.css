@@ -193,3 +193,8 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden}.admin-shell,.admin-
 
 /* V3.4.5 — optional registration intro */
 .event-intro-editor{display:flex;flex-direction:column;gap:7px;margin:18px 0}.event-intro-editor textarea{min-height:110px;resize:vertical}.event-intro-editor small{color:var(--muted);font-size:.7rem;line-height:1.45}.registration-intro{margin:0 0 22px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--event-primary,#009FEE) 28%,var(--border));border-radius:16px;background:color-mix(in srgb,var(--event-primary,#009FEE) 7%,transparent);font-size:.84rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* V3.4.7 — active field required toggle + drag edge auto-scroll support */
+.inline-required-toggle{margin-top:8px;display:inline-flex;align-items:center;gap:8px;width:max-content;font-size:13px;font-weight:700}
+.inline-required-toggle input{width:auto;margin:0}
+.draggable-field.dragging{opacity:.55}

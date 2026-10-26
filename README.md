@@ -82,3 +82,12 @@ Guest rows now inherit leader custom-field values in admin tables and exports wh
 
 ## V3.4.4
 Active custom fields can be renamed safely without changing their internal field keys. No SQL migration required.
+
+
+## V3.4.5
+Optional editable registration intro/description per event, displayed above the form fields.
+
+## V3.4.7
+- Active custom fields can be switched between Required and Optional directly in Form Builder.
+- Drag reorder auto-scrolls near the top/bottom viewport edge.
+- No database migration required.
