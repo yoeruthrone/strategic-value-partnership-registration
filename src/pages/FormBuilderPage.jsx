@@ -10,7 +10,8 @@ const secret=()=>sessionStorage.getItem('sena_admin_secret')||''
 const types=['text','number','date','dropdown','radio','checkbox','textarea','conditional_choice','file']
 const typeLabels={text:'Text',number:'Number',date:'Date / Calendar',dropdown:'Dropdown',radio:'Radio',checkbox:'Checkbox',textarea:'Textarea',yes_no:'Ya / Tidak',conditional_choice:'Conditional Choice',file:'File Upload'}
 const fileTypeLabels={image:'Image only',pdf:'PDF only',image_pdf:'Image + PDF'}
-const emptyDraft=()=>({label:'',field_key:'',field_type:'text',required:false,options:'',choice_a:'',choice_b:'',description:'',allowed_file_type:'image_pdf',reference_image_data_url:null})
+const scopeLabels={GROUP_SHARED:'Group Shared',PER_PARTICIPANT:'Per Participant',LEADER_ONLY:'Leader Only'}
+const emptyDraft=()=>({label:'',field_key:'',field_type:'text',required:false,options:'',choice_a:'',choice_b:'',description:'',allowed_file_type:'image_pdf',reference_image_data_url:null,data_scope:'GROUP_SHARED'})
 const isTrigger=f=>['yes_no','conditional_choice'].includes(f.field_type)
 const logicValue=f=>f.show_if_field_key?`${f.show_if_field_key}:::${f.show_if_value||'YA'}`:''
 
@@ -28,7 +29,16 @@ export default function FormBuilderPage(){
  async function load(){
   const {data,error}=await supabase.rpc('v3_admin_form_config',{p_secret:secret(),p_event_id:eventId})
   if(error)return alert(error.message)
-  if(data){setEvent(data.event);setFields(data.fields||[]);setArchived(data.archived_fields||[])}
+  if(data){
+   setEvent(data.event);setFields(data.fields||[]);setArchived(data.archived_fields||[])
+   const legacyInlineAssets=[...(data.fields||[]),...(data.archived_fields||[])].every(f=>Object.prototype.hasOwnProperty.call(f,'reference_image_data_url'))
+   if(!legacyInlineAssets)supabase.rpc('v3_admin_form_assets',{p_secret:secret(),p_event_id:eventId}).then(({data:assets})=>{
+    if(!assets)return
+    const refs=assets.field_reference_images||{}
+    setFields(prev=>prev.map(f=>({...f,reference_image_data_url:refs[f.field_key]||null})))
+    setArchived(prev=>prev.map(f=>({...f,reference_image_data_url:refs[f.field_key]||null})))
+   })
+  }
  }
  useEffect(()=>{load()},[eventId])
  const triggers=useMemo(()=>fields.filter(isTrigger),[fields])
@@ -44,7 +54,7 @@ export default function FormBuilderPage(){
 
 
  async function upsert(f,shouldReload=true){
-  const payload={...f,description:f.description||'',options:Array.isArray(f.options)?f.options:[],sort_order:f.sort_order||10,show_if_field_key:f.show_if_field_key||null,show_if_value:f.show_if_value||null,allowed_file_type:f.allowed_file_type||'image_pdf',reference_image_data_url:f.reference_image_data_url||null}
+  const payload={...f,description:f.description||'',options:Array.isArray(f.options)?f.options:[],sort_order:f.sort_order||10,show_if_field_key:f.show_if_field_key||null,show_if_value:f.show_if_value||null,allowed_file_type:f.allowed_file_type||'image_pdf'};if(Object.prototype.hasOwnProperty.call(f,'reference_image_data_url'))payload.reference_image_data_url=f.reference_image_data_url||null
   const {error}=await supabase.rpc('v3_admin_upsert_field',{p_secret:secret(),p_event_id:eventId,p_field:payload})
   if(error){alert(error.message);return false}
   if(shouldReload)await load()
@@ -133,9 +143,9 @@ export default function FormBuilderPage(){
       <span className="drag-handle" title="Drag untuk mengubah urutan"><GripVertical size={18}/></span>
       <div className="field-meta">
        <label className="custom-label-editor">Label tampil<input defaultValue={f.label} placeholder="Nama field" onBlur={async e=>{const next=e.target.value.trim();if(!next){e.target.value=f.label;return alert('Label field tidak boleh kosong.')}if(next!==f.label)await upsert({...f,label:next})}}/></label>
-       <span>{typeLabels[f.field_type]||f.field_type}{f.required?' • REQUIRED':' • OPTIONAL'}{f.show_if_field_key?` • CONDITIONAL: ${f.show_if_value||'YA'}`:''}{f.field_type==='file'?` • ${fileTypeLabels[f.allowed_file_type||'image_pdf']} • MAX 1 MB`:''}</span>
+       <span>{typeLabels[f.field_type]||f.field_type}{f.required?' • REQUIRED':' • OPTIONAL'} • {scopeLabels[f.data_scope||'GROUP_SHARED']}{f.show_if_field_key?` • CONDITIONAL: ${f.show_if_value||'YA'}`:''}{f.field_type==='file'?` • ${fileTypeLabels[f.allowed_file_type||'image_pdf']} • MAX 1 MB`:''}</span>
        <span className="field-key-lock">KEY: {f.field_key} • INTERNAL KEY TETAP</span>
-       <label className="check inline-required-toggle"><input type="checkbox" checked={!!f.required} onChange={e=>upsert({...f,required:e.target.checked})} disabled={ordering}/> Wajib diisi</label>
+       <label className="check inline-required-toggle"><input type="checkbox" checked={!!f.required} onChange={e=>upsert({...f,required:e.target.checked})} disabled={ordering}/> Wajib diisi</label><label className="inline-setting">Data berlaku untuk<select value={f.data_scope||'GROUP_SHARED'} onChange={e=>upsert({...f,data_scope:e.target.value})} disabled={ordering}><option value="GROUP_SHARED">Group Shared / ikut leader</option><option value="PER_PARTICIPANT">Per Participant / isi masing-masing</option><option value="LEADER_ONLY">Leader Only</option></select></label>
        {isTrigger(f)&&<div className="conditional-options-preview"><GitBranch size={14}/><span>{(f.options||[]).join(' / ')}</span></div>}
        <textarea className="field-description-input" rows="2" defaultValue={f.description||''} placeholder="Deskripsi / helper text (opsional)" onBlur={e=>upsert({...f,description:e.target.value})}/>
        {f.field_type==='file'&&<label className="inline-setting">Allowed File<select value={f.allowed_file_type||'image_pdf'} onChange={e=>upsert({...f,allowed_file_type:e.target.value})}><option value="image">Image only</option><option value="pdf">PDF only</option><option value="image_pdf">Image + PDF</option></select></label>}
@@ -155,7 +165,7 @@ export default function FormBuilderPage(){
     <label>Label<input value={draft.label} onChange={e=>setDraft({...draft,label:e.target.value,field_key:slugify(e.target.value).replace(/-/g,'_')})}/></label>
     <label>Deskripsi / Helper Text<textarea rows="3" placeholder="Contoh: Upload bukti yang terlihat jelas." value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})}/></label>
     <label>Key<input value={draft.field_key} onChange={e=>setDraft({...draft,field_key:e.target.value.replace(/[^a-z0-9_]/g,'')})}/></label>
-    <label>Type<select value={draft.field_type} onChange={e=>setDraft({...draft,field_type:e.target.value})}>{types.map(t=><option key={t} value={t}>{typeLabels[t]}</option>)}</select></label>
+    <label>Data berlaku untuk<select value={draft.data_scope} onChange={e=>setDraft({...draft,data_scope:e.target.value})}><option value="GROUP_SHARED">Group Shared / ikut leader</option><option value="PER_PARTICIPANT">Per Participant / isi masing-masing</option><option value="LEADER_ONLY">Leader Only</option></select></label><label>Type<select value={draft.field_type} onChange={e=>setDraft({...draft,field_type:e.target.value})}>{types.map(t=><option key={t} value={t}>{typeLabels[t]}</option>)}</select></label>
     {['dropdown','radio','checkbox'].includes(draft.field_type)&&<label>Options (pisahkan koma)<input value={draft.options} onChange={e=>setDraft({...draft,options:e.target.value})}/></label>}
     {draft.field_type==='conditional_choice'&&<div className="conditional-choice-builder"><div className="builder-note"><GitBranch size={16}/><span>Gunakan tepat 2 opsi. Setelah field dibuat, masing-masing opsi dapat dihubungkan ke satu target field.</span></div><label>Opsi 1<input placeholder="Contoh: Sekolah" value={draft.choice_a} onChange={e=>setDraft({...draft,choice_a:e.target.value})}/></label><label>Opsi 2<input placeholder="Contoh: Komunitas" value={draft.choice_b} onChange={e=>setDraft({...draft,choice_b:e.target.value})}/></label></div>}
     {draft.field_type==='file'&&<div className="file-rule-box"><FileUp size={18}/><div><strong>File Upload</strong><p>1 file per field • Maksimal 1 MB. Gambar akan dikompres otomatis jika diperlukan.</p><label>Allowed File<select value={draft.allowed_file_type} onChange={e=>setDraft({...draft,allowed_file_type:e.target.value})}><option value="image">Image only</option><option value="pdf">PDF only</option><option value="image_pdf">Image + PDF</option></select></label></div></div>}

@@ -198,3 +198,9 @@ html,body,#root{width:100%;max-width:100%;overflow-x:hidden}.admin-shell,.admin-
 .inline-required-toggle{margin-top:8px;display:inline-flex;align-items:center;gap:8px;width:max-content;font-size:13px;font-weight:700}
 .inline-required-toggle input{width:auto;margin:0}
 .draggable-field.dragging{opacity:.55}
+
+/* V3.5.0 — admin QR token fallback */
+.qr-token-cell{display:flex;align-items:center;gap:8px;min-width:250px}
+.qr-token-cell code{font-size:12px;word-break:break-all;white-space:normal;max-width:320px}
+.icon-btn.compact{width:30px;height:30px;min-width:30px;padding:0}
+.muted{opacity:.62}
